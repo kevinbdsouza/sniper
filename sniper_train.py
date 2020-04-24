@@ -6,18 +6,15 @@ Calls helper functions from utilities
 import numpy as np
 import sys
 from scipy.io import loadmat
-
+import params
 from utilities.input import get_params
 from pipeline.training import train_with_hic, train_with_mat
 
 if __name__ == '__main__':
+    params = params.Params()
 
-	params = get_params()
+    for chr in range(2, 23, 2):
+        params.chr = chr
+        odd_encodings, even_encodings = train_with_hic(params)
 
-	rowMap = params['cropMap']['rowMap']
-	colMap = params['cropMap']['colMap']
-
-	if not params['usemat']:
-		train_with_hic(params)
-	else:
-		train_with_mat(params)
+    print("done")
