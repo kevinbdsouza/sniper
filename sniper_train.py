@@ -13,8 +13,9 @@ from pipeline.training import train_with_hic, train_with_mat
 if __name__ == '__main__':
     params = params.Params()
 
-    for chr in range(2, 23, 2):
-        params.chr = chr
-        odd_encodings, even_encodings = train_with_hic(params)
+    #for chr in range(2, 23, 2):
+    #   params.chr = chr
+    
+    odd_encodings, even_encodings = train_with_hic(params)
 
     print("done")
