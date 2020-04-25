@@ -25,7 +25,7 @@ def chrom_sizes(f, length=np.inf):
 def constructAndSave(tmp_dir, prefix):
     M = construct(tmp_dir, prefix=prefix)
 
-    savemat(os.path.join(tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M})
+    savemat(os.path.join(chrom_sizes, tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M})
 
     return M
 
