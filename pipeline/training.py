@@ -23,7 +23,7 @@ def trainNN(inputM, targetM, params, dp_ob):
     even_encodings = dp_ob.Sigmoid(even_encoder.predict(inputM.T))
 
     odd_dae_model.save(os.path.join(params.dump_dir, 'odd_chrm_autoencoder.h5'))
-    odd_encoder.save(os.path.join(params.dump_dir., 'odd_chrm_encoder.h5'))
+    odd_encoder.save(os.path.join(params.dump_dir, 'odd_chrm_encoder.h5'))
 
     even_dae_model.save(os.path.join(params.dump_dir, 'even_chrm_autoencoder.h5'))
     even_encoder.save(os.path.join(params.dump_dir, 'even_chrm_encoder.h5'))
