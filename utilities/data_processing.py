@@ -39,7 +39,7 @@ def hicToMat(params, prefix='hic'):
             for chrm2 in range(2, 4, 2):
                 output_path = os.path.join(params.dump_dir, '{2}_chrm{0}_chrm{1}.txt'.format(chrm1, chrm2, prefix))
 
-                os.system("/java -jar {0} dump observed KR {1} {2} {3} BP 100000 {4} > tmp_juicer_log".format(
+                os.system("java -jar {0} dump observed KR {1} {2} {3} BP 100000 {4} > tmp_juicer_log".format(
                     params.juicer_tools_path, params.input_file,
                     chrm1, chrm2,
                     output_path))
