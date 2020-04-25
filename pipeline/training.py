@@ -4,11 +4,11 @@ import tensorflow as tf
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from scipy.io import loadmat
-from utilities.data_processing import hicToMat, trimMat, contactProbabilities, Sigmoid
+from utilities.data_processing import DataProcessing
 from pipeline.models import DenoisingAutoencoder
 
 
-def trainNN(inputM, targetM, params):
+def trainNN(inputM, targetM, params, dp_ob):
     print('Training autoencoders...')
 
     odd_dae_model, odd_encoder, _ = DenoisingAutoencoder(inputM, targetM)
@@ -19,8 +19,8 @@ def trainNN(inputM, targetM, params):
     even_dae_model.fit(inputM.T[:7000], targetM.T[:7000], epochs=10, batch_size=32,
                        validation_data=[inputM.T[7000:], targetM.T[7000:]])
 
-    odd_encodings = Sigmoid(odd_encoder.predict(inputM))
-    even_encodings = Sigmoid(even_encoder.predict(inputM.T))
+    odd_encodings = dp_ob.Sigmoid(odd_encoder.predict(inputM))
+    even_encodings = dp_ob.Sigmoid(even_encoder.predict(inputM.T))
 
     odd_dae_model.save(os.path.join(params['dump_dir'], 'odd_chrm_autoencoder.h5'))
     odd_encoder.save(os.path.join(params['dump_dir'], 'odd_chrm_encoder.h5'))
@@ -34,31 +34,33 @@ def trainNN(inputM, targetM, params):
 def train_with_hic(params):
     print('Constructing input matrix')
 
-    inputM = hicToMat(params,
-                      prefix='input')
+    dp_ob = DataProcessing()
+
+    inputM = dp_ob.hicToMat(params,
+                            prefix='input')
 
     if params.inter_chromosomal:
         print('Trimming sparse regions...')
-        inputM = trimMat(inputM, params.cropIndices)
+        inputM = dp_ob.trimMat(inputM, params.cropIndices)
 
     print('Computing contact probabilities')
-    inputM = contactProbabilities(inputM)
+    inputM = dp_ob.contactProbabilities(inputM)
 
     print('Constructing target matrix')
     if params.input_file != params.target_file:
 
-        targetM = hicToMat(params, prefix='target')
+        targetM = dp_ob.hicToMat(params, prefix='target')
 
         if params.inter_chromosomal:
             print('Trimming sparse regions...')
-            targetM = trimMat(targetM, params['cropIndices'])
+            targetM = dp_ob.trimMat(targetM, params['cropIndices'])
 
         print('Computing contact probabilities')
-        targetM = contactProbabilities(targetM)
+        targetM = dp_ob.contactProbabilities(targetM)
     else:
         targetM = inputM
 
-    odd_encodings, even_encodings = trainNN(inputM, targetM, params)
+    odd_encodings, even_encodings = trainNN(inputM, targetM, params, dp_ob)
 
     return odd_encodings, even_encodings
 
