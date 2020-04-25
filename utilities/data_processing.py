@@ -6,153 +6,147 @@ from scipy.io import loadmat, savemat
 from utilities.interchromosome_matrix import construct
 
 
-def chrom_sizes(f, length=np.inf):
-    data = open(f, 'r')
+class DataProcessing:
+    def __init__(self):
+        self.cfg = None
 
-    sizes = {}
+    def chrom_sizes(self, f, length=np.inf):
+        data = open(f, 'r')
 
-    for line in data:
-        ldata = line.split()
+        sizes = {}
 
-        if len(ldata[0]) > length:
-            continue
+        for line in data:
+            ldata = line.split()
 
-        sizes[ldata[0]] = int(ldata[1])
+            if len(ldata[0]) > length:
+                continue
 
-    return sizes
+            sizes[ldata[0]] = int(ldata[1])
 
+        return sizes
 
-def constructAndSave(tmp_dir, prefix):
-    M = construct(tmp_dir, prefix=prefix)
+    def constructAndSave(self, tmp_dir, prefix):
+        M = construct(tmp_dir, prefix=prefix)
 
-    savemat(os.path.join(chrom_sizes, tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M})
+        savemat(os.path.join(self.chrom_sizes, tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M})
 
-    return M
+        return M
 
+    def hicToMat(self, params, prefix='hic'):
+        """ Calls juicer_tools to extract hic data into txt files """
 
-def hicToMat(params, prefix='hic'):
-    """ Calls juicer_tools to extract hic data into txt files """
+        M = None
+        if params.inter_chromosomal:
+            for chrm1 in range(1, 3, 2):
+                for chrm2 in range(2, 4, 2):
+                    output_path = os.path.join(params.dump_dir, '{2}_chrm{0}_chrm{1}.txt'.format(chrm1, chrm2, prefix))
 
-    M = None
-    if params.inter_chromosomal:
-        for chrm1 in range(1, 3, 2):
-            for chrm2 in range(2, 4, 2):
-                output_path = os.path.join(params.dump_dir, '{2}_chrm{0}_chrm{1}.txt'.format(chrm1, chrm2, prefix))
+                    os.system("java -jar {0} dump observed KR {1} {2} {3} BP 100000 {4} > tmp_juicer_log".format(
+                        params.juicer_tools_path, params.input_file,
+                        chrm1, chrm2,
+                        output_path))
 
-                os.system("java -jar {0} dump observed KR {1} {2} {3} BP 100000 {4} > tmp_juicer_log".format(
-                    params.juicer_tools_path, params.input_file,
-                    chrm1, chrm2,
-                    output_path))
+        else:
+            output_path = os.path.join(params.dump_dir, '{1}_chrm{0}_chrm{0}.txt'.format(params.chr, prefix))
+            os.system(
+                "java - jar {0} dump observed KR {1} {1} {2} BP 10000 {3}".format(params.juicer_tools_path, params.chr,
+                                                                                  params.input_file, output_path))
 
-    else:
-        output_path = os.path.join(params.dump_dir, '{1}_chrm{0}_chrm{0}.txt'.format(params.chr, prefix))
-        os.system(
-            "java - jar {0} dump observed KR {1} {1} {2} BP 10000 {3}".format(params.juicer_tools_path, params.chr,
-                                                                              params.input_file, output_path))
+        if params.save_matrix:
+            M = self.constructAndSave(params.dump_dir, prefix)
 
-    if params.save_matrix:
-        M = constructAndSave(params.dump_dir, prefix)
+        return M
 
-    return M
+    """ Trims sparse, NA, and B4 regions """
 
+    def trimMat(self, M, indices):
+        row_indices = indices['odd_indices'].flatten()
+        col_indices = indices['even_indices'].flatten()
 
-""" Trims sparse, NA, and B4 regions """
+        M = M[row_indices, :]
+        M = M[:, col_indices]
 
+        return M
 
-def trimMat(M, indices):
-    row_indices = indices['odd_indices'].flatten()
-    col_indices = indices['even_indices'].flatten()
+    """Set delta to avoid dividing by zero"""
 
-    M = M[row_indices, :]
-    M = M[:, col_indices]
+    def contactProbabilities(self, M, delta=1e-10):
+        coeff = np.nan_to_num(1 / (M + delta))
+        PM = np.power(1 / np.exp(1), coeff)
 
-    return M
+        return PM
 
+    def RandomSample(self, data):
+        N = len(data)
+        return data[np.random.randint(N)]
 
-"""Set delta to avoid dividing by zero"""
+    def bootstrap(self, data, labels, samplesPerClass=None):
+        Nsamples = samplesPerClass
+        classes = np.unique(labels)
 
+        maxSamples = np.max(np.bincount(labels))
 
-def contactProbabilities(M, delta=1e-10):
-    coeff = np.nan_to_num(1 / (M + delta))
-    PM = np.power(1 / np.exp(1), coeff)
+        if samplesPerClass is None or samplesPerClass < maxSamples:
+            Nsamples = maxSamples
 
-    return PM
+        bootstrapSamples = []
+        bootstrapClasses = []
 
+        for i, c in enumerate(classes):
+            classLabel = c
+            classData = data[labels == c]
 
-def RandomSample(data):
-    N = len(data)
-    return data[np.random.randint(N)]
+            nBootstrap = Nsamples
 
+            for n in range(nBootstrap):
+                sample = self.RandomSample(classData)
 
-def bootstrap(data, labels, samplesPerClass=None):
-    Nsamples = samplesPerClass
-    classes = np.unique(labels)
+                bootstrapSamples.append(sample)
+                bootstrapClasses.append(c)
 
-    maxSamples = np.max(np.bincount(labels))
+        bootstrapSamples = np.asarray(bootstrapSamples)
+        bootstrapClasses = np.asarray(bootstrapClasses)
 
-    if samplesPerClass is None or samplesPerClass < maxSamples:
-        Nsamples = maxSamples
+        bootstrapData = np.hstack((bootstrapSamples, np.array([bootstrapClasses]).T))
+        np.random.shuffle(bootstrapData)
 
-    bootstrapSamples = []
-    bootstrapClasses = []
+        return (bootstrapData[:, :-1], bootstrapData[:, -1])
 
-    for i, c in enumerate(classes):
-        classLabel = c
-        classData = data[labels == c]
+    def Sigmoid(self, data):
+        return 1 / (1 + np.exp(-data))
 
-        nBootstrap = Nsamples
+    def getColorString(self, n):
+        subcColors = ['34,139,34', '152,251,152', '220,20,60', '255,255,0', '112,128,144']
+        return subcColors[n]
 
-        for n in range(nBootstrap):
-            sample = RandomSample(classData)
+    def getSubcName(self, n):
+        order = ['A1', 'A2', 'B1', 'B2', 'B3']
+        return order[n]
 
-            bootstrapSamples.append(sample)
-            bootstrapClasses.append(c)
+    def predictionsToBed(self, path, odds, evens, cropMap, res=100000, sizes_file='data/hg19.chrom.sizes'):
+        rowMap = cropMap['rowMap'].astype(np.int)
+        colMap = cropMap['colMap'].astype(np.int)
 
-    bootstrapSamples = np.asarray(bootstrapSamples)
-    bootstrapClasses = np.asarray(bootstrapClasses)
+        sizes = self.chrom_sizes(sizes_file)
 
-    bootstrapData = np.hstack((bootstrapSamples, np.array([bootstrapClasses]).T))
-    np.random.shuffle(bootstrapData)
+        file = open(path, 'w')
 
-    return (bootstrapData[:, :-1], bootstrapData[:, -1])
+        for i, p in enumerate(np.argmax(odds, axis=1)):
+            m = rowMap
+            chrm, start = 'chr' + str(m[i, 1]), m[i, 2] * res
+            end = np.min([start + res, sizes[chrm]])
+            line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(chrm, start, end, self.getSubcName(p), 0, '.', start,
+                                                                 end,
+                                                                 self.getColorString(p))
+            file.write(line)
 
+        for i, p in enumerate(np.argmax(evens, axis=1)):
+            m = colMap
+            chrm, start = 'chr' + str(m[i, 1]), m[i, 2] * res
+            end = np.min([start + res, sizes[chrm]])
+            line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(chrm, start, end, self.getSubcName(p), 0, '.', start,
+                                                                 end,
+                                                                 self.getColorString(p))
+            file.write(line)
 
-def Sigmoid(data):
-    return 1 / (1 + np.exp(-data))
-
-
-def getColorString(n):
-    subcColors = ['34,139,34', '152,251,152', '220,20,60', '255,255,0', '112,128,144']
-    return subcColors[n]
-
-
-def getSubcName(n):
-    order = ['A1', 'A2', 'B1', 'B2', 'B3']
-    return order[n]
-
-
-def predictionsToBed(path, odds, evens, cropMap, res=100000, sizes_file='data/hg19.chrom.sizes'):
-    rowMap = cropMap['rowMap'].astype(np.int)
-    colMap = cropMap['colMap'].astype(np.int)
-
-    sizes = chrom_sizes(sizes_file)
-
-    file = open(path, 'w')
-
-    for i, p in enumerate(np.argmax(odds, axis=1)):
-        m = rowMap
-        chrm, start = 'chr' + str(m[i, 1]), m[i, 2] * res
-        end = np.min([start + res, sizes[chrm]])
-        line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(chrm, start, end, getSubcName(p), 0, '.', start, end,
-                                                             getColorString(p))
-        file.write(line)
-
-    for i, p in enumerate(np.argmax(evens, axis=1)):
-        m = colMap
-        chrm, start = 'chr' + str(m[i, 1]), m[i, 2] * res
-        end = np.min([start + res, sizes[chrm]])
-        line = '{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(chrm, start, end, getSubcName(p), 0, '.', start, end,
-                                                             getColorString(p))
-        file.write(line)
-
-    file.close()
+        file.close()
