@@ -14,9 +14,9 @@ class Params:
         self.label_file = None
         self.juicer_tools_path = "/data2/hic_lstm/softwares/juicer_tools.jar"
         self.dump_dir = self.hic_path + "sniper"
-        self.cropMap = loadmat('/Users/kevindsouza/Documents/UBC/PhD/Research/nucleosome/sniper/crop_map/cropMap.mat')
+        self.cropMap = loadmat('/home/kevindsouza/Documents/projects/sniper/crop_map/cropMap.mat')
         self.cropIndices = loadmat(
-            '/Users/kevindsouza/Documents/UBC/PhD/Research/nucleosome/sniper/crop_map/cropIndices.mat')
+            '/home/kevindsouza/Documents/projects/sniper/crop_map/cropIndices.mat')
 
         self.inter_chromosomal = True
         self.save_matrix = True
