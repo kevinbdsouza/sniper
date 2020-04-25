@@ -18,7 +18,7 @@ class Params:
         self.cropIndices = loadmat(
             '/home/kevindsouza/Documents/projects/sniper/crop_map/cropIndices.mat')
 
-        self.inter_chromosomal = True
+        self.inter_chromosomal = False
         self.save_matrix = True
         self.autoremove = True
 
