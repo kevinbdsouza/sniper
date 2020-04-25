@@ -49,7 +49,7 @@ class DataProcessing:
         else:
             output_path = os.path.join(params.dump_dir, '{1}_chrm{0}_chrm{0}.txt'.format(params.chr, prefix))
             os.system(
-                "java - jar {0} dump observed KR {1} {1} {2} BP 10000 {3}".format(params.juicer_tools_path, params.chr,
+                "java -jar {0} dump observed KR {1} {1} {2} BP 10000 {3}".format(params.juicer_tools_path, params.chr,
                                                                                   params.input_file, output_path))
 
         if params.save_matrix:
