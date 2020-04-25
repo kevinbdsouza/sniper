@@ -3,12 +3,12 @@ import numpy as np
 import pandas as pd
 
 from scipy.sparse import vstack
-from utilities.data_processing import *
+import utilities.data_processing as DP
 
 
 def construct(hic_dir='.', prefix='hic', hic_res=10000, sizes_file='data/hg19.chrom.sizes', verbose=False):
     fullSM = None
-    chromosome_lengths = chrom_sizes(sizes_file)
+    chromosome_lengths = DP.chrom_sizes(sizes_file)
 
     """Span chrms 1, 3, 5, 7... 21"""
     for i in range(1, 23, 2):
