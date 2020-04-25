@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from scipy.sparse import vstack
-from utilities.data_processing import chrom_sizes
+from utilities.data_processing import *
 
 
 def construct(hic_dir='.', prefix='hic', hic_res=10000, sizes_file='data/hg19.chrom.sizes', verbose=False):
