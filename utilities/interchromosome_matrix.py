@@ -10,13 +10,13 @@ def construct(chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file=
     chromosome_lengths = chrom_sizes(sizes_file)
 
     """Span chrms 1, 3, 5, 7... 21"""
-    for i in range(1, 23, 2):
+    for i in range(1, 3, 2):
 
         # sparse matrix
         rowSM = None
 
         """Interactions with even chromosomes"""
-        for j in range(2, 23, 2):
+        for j in range(2, 4, 2):
 
             if verbose:
                 print('Compiling interactions between chr{0} and chr{1}...'.format(i, j))
