@@ -22,11 +22,11 @@ def trainNN(inputM, targetM, params, dp_ob):
     odd_encodings = dp_ob.Sigmoid(odd_encoder.predict(inputM))
     even_encodings = dp_ob.Sigmoid(even_encoder.predict(inputM.T))
 
-    odd_dae_model.save(os.path.join(params['dump_dir'], 'odd_chrm_autoencoder.h5'))
-    odd_encoder.save(os.path.join(params['dump_dir'], 'odd_chrm_encoder.h5'))
+    odd_dae_model.save(os.path.join(params.dump_dir, 'odd_chrm_autoencoder.h5'))
+    odd_encoder.save(os.path.join(params.dump_dir., 'odd_chrm_encoder.h5'))
 
-    even_dae_model.save(os.path.join(params['dump_dir'], 'even_chrm_autoencoder.h5'))
-    even_encoder.save(os.path.join(params['dump_dir'], 'even_chrm_encoder.h5'))
+    even_dae_model.save(os.path.join(params.dump_dir, 'even_chrm_autoencoder.h5'))
+    even_encoder.save(os.path.join(params.dump_dir, 'even_chrm_encoder.h5'))
 
     return odd_encodings, even_encodings
 
@@ -76,18 +76,19 @@ matrix as a .mat file, which will save the Hi-C matrix to the output directory s
 
 
 def train_with_mat(params):
+    dp_ob = DataProcessing(params)
     print('Using pre-computed .mat files, skipping hic-to-mat')
     inputM = loadmat(params['input_file'])['inter_matrix']
     targetM = loadmat(params['target_file'])['inter_matrix']
 
     print('Trimming sparse regions from input matrix...')
-    inputM = trimMat(inputM, params['cropIndices'])
+    inputM = dp_ob.trimMat(inputM, params['cropIndices'])
     print('Computing contact probabilities')
-    inputM = contactProbabilities(inputM)
+    inputM = dp_ob.contactProbabilities(inputM)
 
     print('Trimming sparse regions from target matrix...')
-    targetM = trimMat(targetM, params['cropIndices'])
+    targetM = dp_ob.trimMat(targetM, params['cropIndices'])
     print('Computing contact probabilities')
-    targetM = contactProbabilities(targetM)
+    targetM = dp_ob.contactProbabilities(targetM)
 
-    trainNN(inputM, targetM, params)
+    trainNN(inputM, targetM, params, dp_ob)
