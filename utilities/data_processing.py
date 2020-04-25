@@ -26,9 +26,9 @@ class DataProcessing:
         return sizes
 
     def constructAndSave(self, tmp_dir, prefix):
-        M = construct(tmp_dir, prefix=prefix)
+        M = construct(self.chrom_sizes, tmp_dir, prefix=prefix)
 
-        savemat(os.path.join(self.chrom_sizes, tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M})
+        savemat(os.path.join(tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M})
 
         return M
 
