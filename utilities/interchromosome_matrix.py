@@ -63,7 +63,7 @@ def construct(chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file=
         else:
             fullSM = vstack([fullSM, rowSM])
 
-    return fullSM.toarray()
+    return fullSM
 
 
 def construct_chr():
