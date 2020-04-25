@@ -3,12 +3,12 @@ import numpy as np
 
 from subprocess import call
 from scipy.io import loadmat, savemat
-from utilities.interchromosome_matrix import construct
+from utilities.interchromosome_matrix import construct, construct_chr
 
 
 class DataProcessing:
-    def __init__(self):
-        self.cfg = None
+    def __init__(self, params):
+        self.params = params
 
     def chrom_sizes(self, f, length=np.inf):
         data = open(f, 'r')
@@ -26,7 +26,7 @@ class DataProcessing:
         return sizes
 
     def constructAndSave(self, tmp_dir, prefix):
-        M = construct(self.chrom_sizes, tmp_dir, prefix=prefix)
+        M = construct_chr(self.params, self.chrom_sizes, tmp_dir, prefix=prefix)
 
         savemat(os.path.join(tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M}, do_compression=True)
 

@@ -5,9 +5,8 @@ import pandas as pd
 from scipy.sparse import vstack
 
 
-def construct(chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file='data/hg19.chrom.sizes', verbose=False):
+def construct(params, chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file='data/hg19.chrom.sizes'):
     fullSM = None
-    chromosome_lengths = chrom_sizes(sizes_file)
 
     """Span chrms 1, 3, 5, 7... 21"""
     for i in range(1, 3, 2):
@@ -17,9 +16,6 @@ def construct(chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file=
 
         """Interactions with even chromosomes"""
         for j in range(2, 4, 2):
-
-            if verbose:
-                print('Compiling interactions between chr{0} and chr{1}...'.format(i, j))
 
             filepath = os.path.join(hic_dir, '{2}_chrm{0}_chrm{1}.txt'.format(i, j, prefix))
 
@@ -66,5 +62,27 @@ def construct(chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file=
     return fullSM
 
 
-def construct_chr():
-    pass
+def construct_chr(params, chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file='data/hg19.chrom.sizes'):
+    chromosome_lengths = chrom_sizes(sizes_file)
+
+    filepath = os.path.join(hic_dir, '{1}_chrm{0}_chrm{0}.txt'.format(params.chr, prefix))
+
+    txt_data = pd.read_csv(filepath, sep='\t', header=None).values
+
+    nrow = int(chromosome_lengths['chr' + str(params.chr)] / hic_res + 1)
+    ncol = nrow
+
+    SM = np.zeros((nrow, ncol))
+
+    rows = txt_data[:, 0] / hic_res
+    cols = txt_data[:, 1] / hic_res
+
+    data = txt_data[:, 2]
+
+    rows = rows.astype(int)
+    cols = cols.astype(int)
+
+    SM[rows, cols] = data
+    SM[cols, rows] = data
+
+    return SM

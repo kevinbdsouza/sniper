@@ -34,7 +34,7 @@ def trainNN(inputM, targetM, params, dp_ob):
 def train_with_hic(params):
     print('Constructing input matrix')
 
-    dp_ob = DataProcessing()
+    dp_ob = DataProcessing(params)
 
     inputM = dp_ob.hicToMat(params,
                             prefix='input')
