@@ -1,10 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
-import pickle as pkl
 
-from scipy.sparse import coo_matrix, hstack, vstack
-from scipy.io import savemat
+from scipy.sparse import vstack
 from utilities.data_processing import chrom_sizes
 
 

@@ -4,10 +4,8 @@ import tensorflow as tf
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from scipy.io import loadmat
-from utilities.data_processing import hicToMat, trimMat, contactProbabilities, bootstrap, Sigmoid
-from pipeline.models import DenoisingAutoencoder, Classifier
-
-from keras.utils import to_categorical
+from utilities.data_processing import hicToMat, trimMat, contactProbabilities, Sigmoid
+from pipeline.models import DenoisingAutoencoder
 
 
 def trainNN(inputM, targetM, params):

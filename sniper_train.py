@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     #for chr in range(2, 23, 2):
     #   params.chr = chr
-    
+
     odd_encodings, even_encodings = train_with_hic(params)
 
     print("done")
