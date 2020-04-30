@@ -25,3 +25,4 @@ class Params:
         self.overwrite = True
         self.usemat = False
         self.chr = None
+        self.mode = None
