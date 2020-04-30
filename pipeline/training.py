@@ -16,6 +16,8 @@ def trainNNchr(inputM, targetM, params, dp_ob):
         dae_model, encoder, _ = DenoisingAutoencoder(inputM, targetM)
         dae_model.fit(inputM[:7000], targetM[:7000], epochs=10, batch_size=32,
                       validation_data=[inputM[7000:], targetM[7000:]])
+        score = None
+
     elif params.mode == "test":
         dae_model = load_model('chrm_autoencoder.h5')
         encoder = load_model('chrm_encoder.h5')

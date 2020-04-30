@@ -15,7 +15,7 @@ if __name__ == '__main__':
     for chr in range(15, 22, 2):
         params.chr = chr
         params.mode = mode
-        encodings = train_with_hic(params)
+        encodings, score = train_with_hic(params)
 
         np.save(params.dump_dir + '/', 'encoding_' + str(chr) + '.npy', encodings
                 )
