@@ -8,6 +8,22 @@ from utilities.data_processing import DataProcessing
 from pipeline.models import DenoisingAutoencoder
 
 
+def trainNNchr(inputM, targetM, params, dp_ob):
+    print('Training autoencoder')
+
+    dae_model, encoder, _ = DenoisingAutoencoder(inputM, targetM)
+
+    dae_model.fit(inputM[:7000], targetM[:7000], epochs=10, batch_size=32,
+                  validation_data=[inputM[7000:], targetM[7000:]])
+
+    encodings = dp_ob.Sigmoid(encoder.predict(inputM))
+
+    dae_model.save(os.path.join(params.dump_dir, 'odd_chrm_autoencoder.h5'))
+    encoder.save(os.path.join(params.dump_dir, 'odd_chrm_encoder.h5'))
+
+    return encodings
+
+
 def trainNN(inputM, targetM, params, dp_ob):
     print('Training autoencoders...')
 
@@ -60,9 +76,9 @@ def train_with_hic(params):
     else:
         targetM = inputM
 
-    odd_encodings, even_encodings = trainNN(inputM, targetM, params, dp_ob)
+    encodings = trainNN(inputM, targetM, params, dp_ob)
 
-    return odd_encodings, even_encodings
+    return encodings
 
 
 """

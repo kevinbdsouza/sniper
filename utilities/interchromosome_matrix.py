@@ -7,6 +7,7 @@ from scipy.sparse import vstack
 
 def construct(params, chrom_sizes, hic_dir='.', prefix='hic', hic_res=10000, sizes_file='data/hg19.chrom.sizes'):
     fullSM = None
+    chromosome_lengths = chrom_sizes(sizes_file)
 
     """Span chrms 1, 3, 5, 7... 21"""
     for i in range(1, 3, 2):

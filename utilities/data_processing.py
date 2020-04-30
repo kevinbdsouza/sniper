@@ -1,9 +1,8 @@
 import os
 import numpy as np
 
-from subprocess import call
-from scipy.io import loadmat, savemat
-from utilities.interchromosome_matrix import construct, construct_chr
+from scipy.io import savemat
+from utilities.interchromosome_matrix import construct_chr
 
 
 class DataProcessing:
