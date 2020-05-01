@@ -13,6 +13,7 @@ if __name__ == '__main__':
     params = params.Params()
 
     for chr in range(15, 23):
+        print("Training Chromosome {}".format(chr))
         params.chr = chr
         params.mode = mode
 
