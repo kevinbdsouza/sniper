@@ -12,7 +12,7 @@ mode = "test"
 if __name__ == '__main__':
     params = params.Params()
 
-    for chr in range(15, 22, 2):
+    for chr in range(15, 23):
         params.chr = chr
         params.mode = mode
         encodings, score = train_with_hic(params)

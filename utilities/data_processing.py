@@ -27,7 +27,10 @@ class DataProcessing:
     def constructAndSave(self, tmp_dir, prefix):
         M = construct_chr(self.params, self.chrom_sizes, tmp_dir, prefix=prefix)
 
-        savemat(os.path.join(tmp_dir, '%s_matrix.mat' % prefix), {'inter_matrix': M}, do_compression=True)
+        output_mat_path = os.path.join(tmp_dir, '%s_matrix.mat' % prefix)
+        self.params.output_mat_path = output_mat_path
+
+        savemat(self.params.output_mat_path, {'inter_matrix': M}, do_compression=True)
 
         return M
 
@@ -38,19 +41,21 @@ class DataProcessing:
         if params.inter_chromosomal:
             for chrm1 in range(1, 3, 2):
                 for chrm2 in range(2, 4, 2):
-                    output_path = os.path.join(params.dump_dir, '{2}_chrm{0}_chrm{1}.txt'.format(chrm1, chrm2, prefix))
+                    output_txt_path = os.path.join(params.dump_dir,
+                                                   '{2}_chrm{0}_chrm{1}.txt'.format(chrm1, chrm2, prefix))
 
                     os.system("java -jar {0} dump observed KR {1} {2} {3} BP 100000 {4} > tmp_juicer_log".format(
                         params.juicer_tools_path, params.input_file,
                         chrm1, chrm2,
-                        output_path))
+                        output_txt_path))
 
         else:
-            output_path = os.path.join(params.dump_dir, '{1}_chrm{0}_chrm{0}.txt'.format(params.chr, prefix))
+            output_txt_path = os.path.join(params.dump_dir, '{1}_chrm{0}_chrm{0}.txt'.format(params.chr, prefix))
+            self.params.output_txt_path = output_txt_path
             os.system(
                 "java -jar {0} dump observed KR {1} {2} {2} BP 10000 {3}".format(params.juicer_tools_path,
                                                                                  params.input_file, params.chr,
-                                                                                 output_path))
+                                                                                 output_txt_path))
 
         if params.save_matrix:
             M = self.constructAndSave(params.dump_dir, prefix)

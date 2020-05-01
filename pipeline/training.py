@@ -5,29 +5,34 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from scipy.io import loadmat
 from utilities.data_processing import DataProcessing
-from pipeline.models import DenoisingAutoencoder
 from keras.models import load_model
+from pipeline.models import DenoisingAutoencoder
 
 
 def trainNNchr(inputM, targetM, params, dp_ob):
     print('Training autoencoder')
 
+    train_end = int(0.6 * len(inputM))
+    valid_end = train_end + int(0.2 * len(inputM))
+
     if params.mode == "train":
         dae_model, encoder, _ = DenoisingAutoencoder(inputM, targetM)
-        dae_model.fit(inputM[:7000], targetM[:7000], epochs=10, batch_size=32,
-                      validation_data=[inputM[7000:], targetM[7000:]])
+        dae_model.fit(inputM[:train_end], targetM[:train_end], epochs=10, batch_size=32,
+                      validation_data=[inputM[train_end:valid_end], targetM[train_end:valid_end]])
+
+        encodings = None
         score = None
 
     elif params.mode == "test":
-        dae_model = load_model('chrm_autoencoder.h5')
-        encoder = load_model('chrm_encoder.h5')
+        dae_model = load_model(str(params.chr) + '_autoencoder.h5')
+        encoder = load_model(str(params.chr) + '_encoder.h5')
 
-        score = dae_model.evaluate(inputM, targetM)
+        score = dae_model.evaluate(inputM[valid_end:], targetM[valid_end:])
 
-    encodings = dp_ob.Sigmoid(encoder.predict(inputM))
+        encodings = dp_ob.Sigmoid(encoder.predict(inputM))
 
-    dae_model.save(os.path.join(params.dump_dir, 'chrm_autoencoder.h5'))
-    encoder.save(os.path.join(params.dump_dir, 'chrm_encoder.h5'))
+    dae_model.save(os.path.join(params.dump_dir, str(params.chr) + '_autoencoder.h5'))
+    encoder.save(os.path.join(params.dump_dir, str(params.chr) + '_encoder.h5'))
 
     return encodings, score
 
@@ -39,10 +44,11 @@ def trainNN(inputM, targetM, params, dp_ob):
         odd_dae_model, odd_encoder, _ = DenoisingAutoencoder(inputM, targetM)
         even_dae_model, even_encoder, _ = DenoisingAutoencoder(inputM.T, targetM.T)
 
-        odd_dae_model.fit(inputM[:7000], targetM[:7000], epochs=10, batch_size=32,
-                          validation_data=[inputM[7000:], targetM[7000:]])
-        even_dae_model.fit(inputM.T[:7000], targetM.T[:7000], epochs=10, batch_size=32,
-                           validation_data=[inputM.T[7000:], targetM.T[7000:]])
+        train_len = int(len(inputM))
+        odd_dae_model.fit(inputM[:train_len], targetM[:train_len], epochs=10, batch_size=32,
+                          validation_data=[inputM[train_len:], targetM[train_len:]])
+        even_dae_model.fit(inputM.T[:train_len], targetM.T[:train_len], epochs=10, batch_size=32,
+                           validation_data=[inputM.T[train_len:], targetM.T[train_len:]])
     elif params.mode == "test":
         odd_dae_model = load_model('odd_chrm_autoencoder.h5')
         odd_encoder = load_model('odd_chrm_encoder.h5')
@@ -94,6 +100,9 @@ def train_with_hic(params):
         targetM = inputM
 
     encodings, score = trainNNchr(inputM, targetM, params, dp_ob)
+
+    os.system("rm {}".format(dp_ob.params.output_txt_path))
+    os.system("rm {}".format(dp_ob.params.output_mat_path))
 
     return encodings, score
 

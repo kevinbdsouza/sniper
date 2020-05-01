@@ -21,8 +21,10 @@ class Params:
         self.inter_chromosomal = False
         self.save_matrix = True
         self.autoremove = True
-
         self.overwrite = True
         self.usemat = False
+
         self.chr = None
         self.mode = None
+        self.output_txt_path = None
+        self.output_mat_path = None
