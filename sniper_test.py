@@ -18,7 +18,6 @@ if __name__ == '__main__':
         params.mode = mode
         encodings, score = train_with_hic(params)
 
-        np.save(params.dump_dir + '/', 'encoding_' + str(chr) + '.npy', encodings
-                )
+        np.save(params.dump_dir + '/' + 'encoding_' + str(chr) + '.npy', encodings)
 
     print("done")
