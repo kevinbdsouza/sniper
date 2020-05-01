@@ -25,7 +25,7 @@ def trainNNchr(inputM, targetM, params, dp_ob):
 
     elif params.mode == "test":
         dae_model = load_model(os.path.join(params.dump_dir, str(params.chr) + '_autoencoder.h5'))
-        encoder = load_model(params.dump_dir, str(params.chr) + '_encoder.h5')
+        encoder = load_model(os.path.join(params.dump_dir, str(params.chr) + '_encoder.h5'))
 
         score = dae_model.evaluate(inputM[valid_end:], targetM[valid_end:])
 
@@ -51,9 +51,9 @@ def trainNN(inputM, targetM, params, dp_ob):
                            validation_data=[inputM.T[train_len:], targetM.T[train_len:]])
     elif params.mode == "test":
         odd_dae_model = load_model(os.path.join(params.dump_dir, 'odd_chrm_autoencoder.h5'))
-        odd_encoder = load_model(params.dump_dir, 'odd_chrm_encoder.h5')
+        odd_encoder = load_model(os.path.join(params.dump_dir, 'odd_chrm_encoder.h5'))
         even_dae_model = load_model(os.path.join(params.dump_dir, 'even_chrm_autoencoder.h5'))
-        even_encoder = load_model(params.dump_dir, 'even_chrm_encoder.h5')
+        even_encoder = load_model(os.path.join(params.dump_dir, 'even_chrm_encoder.h5'))    
 
         odd_score = odd_dae_model.evaluate(inputM, targetM)
         even_score = even_dae_model.evaluate(inputM.T, targetM.T)
