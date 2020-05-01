@@ -6,8 +6,8 @@ from keras.models import Sequential, Model
 def DenoisingAutoencoder(input, target):
     Ninput = input.shape[1]
     Noutput = target.shape[1]
-    hidden_dims = [1024, 512, 256]
-    latent_dim = 128
+    hidden_dims = [256, 128, 64]
+    latent_dim = 16
 
     encodeInput = Input(shape=(Ninput,))
     encodeModel = Sequential([Dense(hidden_dims[0], activation='relu', input_dim=Ninput)])
