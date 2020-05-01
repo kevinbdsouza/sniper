@@ -13,6 +13,7 @@ if __name__ == '__main__':
     params = params.Params()
 
     for chr in range(12, 23):
+        print("Testing Chromosome {}".format(chr))
         params.chr = chr
         params.mode = mode
         encodings, score = train_with_hic(params)
