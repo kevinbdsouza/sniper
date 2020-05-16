@@ -73,6 +73,7 @@ def trainNN(inputM, targetM, params, dp_ob):
 def train_with_hic(params):
     print('Constructing input matrix')
 
+    score = None
     dp_ob = DataProcessing(params)
 
     inputM = dp_ob.hicToMat(params,
@@ -99,10 +100,16 @@ def train_with_hic(params):
     else:
         targetM = inputM
 
-    encodings, score = trainNNchr(inputM, targetM, params, dp_ob)
+    if params.exp == "pca":
+        encodings = dp_ob.get_pca_encodings(inputM)
+    else:
+        encodings, score = trainNNchr(inputM, targetM, params, dp_ob)
 
-    os.system("rm {}".format(dp_ob.params.output_txt_path))
-    os.system("rm {}".format(dp_ob.params.output_mat_path))
+    try:
+        os.system("rm {}".format(dp_ob.params.output_txt_path))
+        os.system("rm {}".format(dp_ob.params.output_mat_path))
+    except Exception as e:
+        print(e)
 
     return encodings, score
 

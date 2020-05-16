@@ -3,7 +3,7 @@ import numpy as np
 
 from scipy.io import savemat
 from utilities.interchromosome_matrix import construct_chr
-
+from sklearn.decomposition import PCA
 
 class DataProcessing:
     def __init__(self, params):
@@ -24,13 +24,21 @@ class DataProcessing:
 
         return sizes
 
+    def get_pca_encodings(self, inputM):
+        pca = PCA(n_components=self.params.num_features)
+        pca_encodings = pca.fit_transform(inputM)
+
+        return pca_encodings
+
     def constructAndSave(self, tmp_dir, prefix):
         M = construct_chr(self.params, self.chrom_sizes, tmp_dir, prefix=prefix)
 
-        output_mat_path = os.path.join(tmp_dir, '%s_matrix.mat' % prefix)
-        self.params.output_mat_path = output_mat_path
-
-        savemat(self.params.output_mat_path, {'inter_matrix': M}, do_compression=True)
+        if self.params.exp == "pca":
+            M = M
+        else:
+            output_mat_path = os.path.join(tmp_dir, '%s_matrix.mat' % prefix)
+            self.params.output_mat_path = output_mat_path
+            savemat(self.params.output_mat_path, {'inter_matrix': M}, do_compression=True)
 
         return M
 

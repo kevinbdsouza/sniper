@@ -13,7 +13,6 @@ class Params:
         self.target_file = self.input_file
         self.label_file = None
         self.juicer_tools_path = "/data2/hic_lstm/softwares/juicer_tools.jar"
-        self.dump_dir = self.hic_path + "sniper"
         self.cropMap = loadmat('/home/kevindsouza/Documents/projects/sniper/crop_map/cropMap.mat')
         self.cropIndices = loadmat(
             '/home/kevindsouza/Documents/projects/sniper/crop_map/cropIndices.mat')
@@ -28,3 +27,10 @@ class Params:
         self.mode = None
         self.output_txt_path = None
         self.output_mat_path = None
+        self.exp = "pca"
+        self.num_features = 16
+
+        if self.exp == "pca":
+            self.dump_dir = self.hic_path + "pca"
+        else:
+            self.dump_dir = self.hic_path + "sniper"
